@@ -25,8 +25,8 @@ function ProductGrid({ products, loading, onOpen, onAdd }) {
     return (
       <div className="state">
         <div className="state-ic">⌀</div>
-        <h3>No pieces found</h3>
-        <p>Try a different category or search term.</p>
+        <h3>Mahsulot topilmadi</h3>
+        <p>Boshqa kategoriya yoki qidiruv so'zini sinab ko'ring.</p>
       </div>
     );
   }

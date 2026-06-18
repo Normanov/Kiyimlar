@@ -42,7 +42,7 @@ function Signup() {
       <aside className="auth-aside">
         <div className="auth-aside-art" />
         <div className="auth-aside-inner">
-          <span className="eyebrow">Join MAISON</span>
+          <span className="eyebrow">Join MONO</span>
           <h2>A wardrobe worth keeping starts here.</h2>
           <p>
             Create your account to save favourites, build a considered closet, and

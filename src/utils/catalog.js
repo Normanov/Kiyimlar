@@ -21,22 +21,23 @@ const ICONS = {
 };
 
 // key → { from, to, icon }. The chip icon path is also taken from here.
+// Cool, near-monochrome lookbook palette with a faint per-category temperature.
 const CATEGORY_META = {
-  "t-shirts": { from: "#e9ddcb", to: "#cbb389", icon: "tshirt" },
-  shirts: { from: "#dfe3e0", to: "#b6c0ba", icon: "hanger" },
-  "hoodies & sweatshirts": { from: "#dad3c6", to: "#b3a791", icon: "tshirt" },
-  "jackets & coats": { from: "#cecabf", to: "#8f8b7d", icon: "hanger" },
-  jeans: { from: "#c9d2dc", to: "#94a6bb", icon: "trousers" },
-  "trousers & chinos": { from: "#e0d6c4", to: "#b8a585", icon: "trousers" },
-  shorts: { from: "#e7dcc6", to: "#cdb78f", icon: "trousers" },
-  "sweaters & knitwear": { from: "#e6d3c1", to: "#c9a98c", icon: "hanger" },
-  dresses: { from: "#ecd6d2", to: "#d3a9a4", icon: "dress" },
-  activewear: { from: "#d2dcd6", to: "#9fb3aa", icon: "tshirt" },
-  "suits & blazers": { from: "#d3cec6", to: "#9a9389", icon: "hanger" },
-  accessories: { from: "#e7ddcf", to: "#c8b394", icon: "bag" },
+  "t-shirts": { from: "#f2f2f4", to: "#d7d8de", icon: "tshirt" },
+  shirts: { from: "#eef0f4", to: "#ccd2db", icon: "hanger" },
+  "hoodies & sweatshirts": { from: "#eeeef2", to: "#d3d4db", icon: "tshirt" },
+  "jackets & coats": { from: "#eaeaef", to: "#c6c7d0", icon: "hanger" },
+  jeans: { from: "#e8ebf4", to: "#c1cbde", icon: "trousers" },
+  "trousers & chinos": { from: "#efeef3", to: "#d4d3dd", icon: "trousers" },
+  shorts: { from: "#f0f0f4", to: "#d8d9df", icon: "trousers" },
+  "sweaters & knitwear": { from: "#eeedf3", to: "#d3d1dd", icon: "hanger" },
+  dresses: { from: "#f1eef4", to: "#d9d2df", icon: "dress" },
+  activewear: { from: "#eaeef1", to: "#c8d1d5", icon: "tshirt" },
+  "suits & blazers": { from: "#eaeaef", to: "#c8c9d2", icon: "hanger" },
+  accessories: { from: "#eeeef3", to: "#d3d4dd", icon: "bag" },
 };
 
-const DEFAULT_META = { from: "#e3dccf", to: "#bcae93", icon: "hanger" };
+const DEFAULT_META = { from: "#eeeef3", to: "#d2d3db", icon: "hanger" };
 
 export function categoryMeta(name = "") {
   return CATEGORY_META[String(name).trim().toLowerCase()] || DEFAULT_META;
@@ -77,16 +78,16 @@ export function productFallback(product) {
   </defs>
   <rect width="400" height="500" fill="url(#${id})"/>
   <rect width="400" height="500" fill="url(#${id}h)"/>
-  <g transform="translate(200 235)">
+  <g transform="translate(200 232)">
     <g transform="scale(7.2) translate(-12 -12)">
-      <path d="${iconPath}" fill="none" stroke="#2a221a" stroke-opacity="0.42"
-            stroke-width="1.05" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="${iconPath}" fill="none" stroke="#1c1c24" stroke-opacity="0.38"
+            stroke-width="1" stroke-linejoin="round" stroke-linecap="round"/>
     </g>
   </g>
-  <text x="200" y="450" text-anchor="middle" font-family="Georgia, serif"
-        font-size="17" letter-spacing="6" fill="#2a221a" fill-opacity="0.5">MAISON</text>
+  <text x="200" y="450" text-anchor="middle" font-family="'Space Grotesk', Arial, sans-serif"
+        font-weight="600" font-size="16" letter-spacing="5" fill="#1c1c24" fill-opacity="0.55">MONO</text>
   <text x="200" y="474" text-anchor="middle" font-family="Inter, Arial, sans-serif"
-        font-size="10.5" letter-spacing="2.5" fill="#2a221a" fill-opacity="0.38">${escapeXml(
+        font-size="10" letter-spacing="2.5" fill="#1c1c24" fill-opacity="0.4">${escapeXml(
           catName.toUpperCase()
         )}</text>
 </svg>`.trim();

@@ -1,8 +1,8 @@
 import axios from "axios";
 
-// Base URL points at the FastAPI backend. Override with VITE_API_URL if needed.
+// Base URL points at the backend. Override with VITE_API_URL in a .env file.
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
+  baseURL: import.meta.env.VITE_API_URL || "https://api.gastro-analytics.uz",
 });
 
 // Attach the JWT (if present) to every request automatically.

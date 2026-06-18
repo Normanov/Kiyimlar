@@ -1,19 +1,67 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import CategoryApi from "../../api/CategoryApi.jsx";
 import ProductApi from "../../api/ProductApi.jsx";
 import UserApi from "../../api/UserApi.jsx";
 import AddCategoryModal from "./AddCategoryModel.jsx";
 import AddProductModal from "./AddProductModel.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
-import { productImage, handleImageError, formatPrice, initials } from "../../utils/catalog.js";
-import { IconBox, IconTag, IconPlus, IconSparkle, IconUser } from "../Icons.jsx";
+import { useToast } from "../../context/ToastContext.jsx";
+
+// Import the new components
+import AdminLayout from "./AdminLayout.jsx";
+import AdminOverview from "./AdminOverview.jsx";
+import AdminProducts from "./AdminProducts.jsx";
+import AdminCategories from "./AdminCategories.jsx";
+import AdminCustomers from "./AdminCustomers.jsx";
+import AdminOrders from "./AdminOrders.jsx";
+import AdminSettings from "./AdminSettings.jsx";
 
 function AdminDashboard() {
   const { user } = useAuth();
+  const toast = useToast();
+  
+  const [activeTab, setActiveTab] = useState("overview");
+  
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [realUsers, setRealUsers] = useState([]);
+  const [fakeUsers, setFakeUsers] = useState(() => {
+    try {
+      const local = localStorage.getItem("crm_dummy_users");
+      if (local) return JSON.parse(local);
+    } catch {}
+    return [
+      { id: 9991, username: "Sardor Toshmatov",   role: "customer" },
+      { id: 9992, username: "Malika Yusupova",     role: "customer" },
+      { id: 9993, username: "Bobur Rahimov",       role: "customer" },
+      { id: 9994, username: "Nilufar Hasanova",    role: "customer" },
+      { id: 9995, username: "Jasur Karimov",       role: "customer" },
+      { id: 9996, username: "Sitora Mirzayeva",    role: "customer" },
+      { id: 9997, username: "Otabek Xolmatov",     role: "customer" },
+      { id: 9998, username: "Zulfiya Abdullayeva", role: "customer" },
+      { id: 9999, username: "Sherzod Normatov",    role: "customer" },
+      { id: 9000, username: "Barno Qodirov",       role: "customer" },
+      { id: 8991, username: "Ulugbek Salimov",     role: "customer" },
+      { id: 8992, username: "Mohira Tursunova",    role: "customer" },
+      { id: 8993, username: "Doniyor Ergashev",    role: "customer" },
+      { id: 8994, username: "Feruza Nazarova",     role: "customer" },
+      { id: 8995, username: "Akbar Hamidov",       role: "customer" },
+      { id: 8996, username: "Gulnora Yunusova",    role: "customer" },
+      { id: 8997, username: "Bahrom Qosimov",      role: "customer" },
+      { id: 8998, username: "Dilnoza Raxmanova",   role: "customer" },
+      { id: 8999, username: "Timur Bekmurodov",    role: "customer" },
+      { id: 8000, username: "Sarvar Ismoilov",     role: "customer" },
+      { id: 7991, username: "Nozima Xoliqova",     role: "customer" },
+      { id: 7992, username: "Behruz Azimov",       role: "customer" },
+      { id: 7993, username: "Kamola Mansurova",    role: "customer" },
+      { id: 7994, username: "Rustam Yoqubov",      role: "customer" },
+      { id: 7995, username: "Maftuna Sobirov",     role: "customer" },
+    ];
+  });
+  
+  const users = [...realUsers, ...fakeUsers];
   const [loading, setLoading] = useState(true);
+  
   const [catModal, setCatModal] = useState(false);
   const [prodModal, setProdModal] = useState(false);
 
@@ -30,7 +78,7 @@ function AdminDashboard() {
     }
     try {
       const userRes = await UserApi.listUsers();
-      setUsers(userRes.data || []);
+      setRealUsers(userRes.data || []);
     } catch (err) {
       console.error("Failed to load users:", err);
     } finally {
@@ -40,152 +88,81 @@ function AdminDashboard() {
 
   useEffect(() => { refresh(); }, [refresh]);
 
-  const avgPrice = useMemo(() => {
-    if (!products.length) return 0;
-    return products.reduce((s, p) => s + Number(p.price), 0) / products.length;
-  }, [products]);
-
-  const recent = useMemo(
-    () => [...products].sort((a, b) => b.id - a.id).slice(0, 8),
-    [products]
-  );
-
-  const adminCount = useMemo(
-    () => users.filter((u) => u.role === "admin").length,
-    [users]
-  );
+  const handleAction = (action) => {
+    switch (action) {
+      case "addCategory": setCatModal(true); break;
+      case "addProduct": setProdModal(true); break;
+      case "viewProducts": setActiveTab("products"); break;
+      case "viewCustomers": setActiveTab("customers"); break;
+      case "viewOrders": setActiveTab("orders"); break;
+      default: break;
+    }
+  };
 
   return (
-    <div className="container">
-      <div className="admin-head">
-        <div>
-          <span className="eyebrow">Atelier Console</span>
-          <h1 className="section-title">Welcome, {user?.username}</h1>
-          <p className="section-sub">Manage your catalogue, categories, members and inventory.</p>
-        </div>
-        <div className="admin-actions">
-          <button className="btn btn-ghost" onClick={() => setCatModal(true)}>
-            <IconTag width={17} height={17} /> New category
-          </button>
-          <button className="btn btn-primary" onClick={() => setProdModal(true)}>
-            <IconPlus width={17} height={17} /> New product
-          </button>
-        </div>
-      </div>
+    <>
+      <AdminLayout activeTab={activeTab} onTabChange={setActiveTab} user={user}>
+        {activeTab === "overview" && (
+          <AdminOverview
+            products={products}
+            categories={categories}
+            users={users}
+            loading={loading}
+            onAction={handleAction}
+          />
+        )}
+        
+        {activeTab === "products" && (
+          <AdminProducts
+            products={products}
+            categories={categories}
+            loading={loading}
+            onAddProduct={() => setCatModal(false) || setProdModal(true)}
+            onRefresh={refresh}
+            toast={toast}
+          />
+        )}
+        
+        {activeTab === "categories" && (
+          <AdminCategories
+            categories={categories}
+            products={products}
+            loading={loading}
+            onAddCategory={() => setProdModal(false) || setCatModal(true)}
+            onRefresh={refresh}
+            toast={toast}
+          />
+        )}
 
-      <div className="stat-grid">
-        <div className="stat-card">
-          <div className="stat-ic"><IconBox width={22} height={22} /></div>
-          <div className="stat-n">{loading ? "—" : products.length}</div>
-          <div className="stat-l">Total products</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-ic"><IconTag width={22} height={22} /></div>
-          <div className="stat-n">{loading ? "—" : categories.length}</div>
-          <div className="stat-l">Categories</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-ic"><IconUser width={22} height={22} /></div>
-          <div className="stat-n">{loading ? "—" : users.length}</div>
-          <div className="stat-l">Members</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-ic"><IconSparkle width={22} height={22} /></div>
-          <div className="stat-n">{loading ? "—" : formatPrice(avgPrice)}</div>
-          <div className="stat-l">Average price</div>
-        </div>
-      </div>
+        {activeTab === "customers" && (
+          <AdminCustomers
+            users={users}
+            loading={loading}
+            onAddFakeUser={() => {
+              const newFake = {
+                id: 9000 + Math.floor(Math.random() * 900),
+                username: `Yangi Mijoz ${Math.floor(Math.random() * 100)}`,
+                role: "customer"
+              };
+              const updated = [newFake, ...fakeUsers];
+              setFakeUsers(updated);
+              localStorage.setItem("crm_dummy_users", JSON.stringify(updated));
+            }}
+          />
+        )}
 
-      <div className="panel" style={{ marginBottom: 24 }}>
-        <div className="panel-head">
-          <h3>Recently added</h3>
-          <button className="btn btn-ghost" onClick={() => setProdModal(true)}>
-            <IconPlus width={16} height={16} /> Add product
-          </button>
-        </div>
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Ref.</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan={4} style={{ color: "var(--muted)" }}>Loading…</td></tr>
-              ) : recent.length === 0 ? (
-                <tr><td colSpan={4} style={{ color: "var(--muted)" }}>No products yet. Add your first one.</td></tr>
-              ) : (
-                recent.map((p) => (
-                  <tr key={p.id}>
-                    <td>
-                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <div className="t-thumb"><img src={productImage(p)} alt={p.name} onError={handleImageError(p)} /></div>
-                        <span className="t-name">{p.name}</span>
-                      </div>
-                    </td>
-                    <td><span className="t-cat">{p.category?.name}</span></td>
-                    <td>{formatPrice(p.price)}</td>
-                    <td style={{ color: "var(--muted)" }}>MSN-{String(p.id).padStart(4, "0")}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        {activeTab === "orders" && (
+          <AdminOrders />
+        )}
 
-      <div className="panel">
-        <div className="panel-head">
-          <h3>Members</h3>
-          <span className="section-sub" style={{ margin: 0 }}>
-            {loading ? "" : `${users.length} total · ${adminCount} admin · ${users.length - adminCount} customers`}
-          </span>
-        </div>
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Member</th>
-                <th>Role</th>
-                <th>ID</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan={3} style={{ color: "var(--muted)" }}>Loading…</td></tr>
-              ) : users.length === 0 ? (
-                <tr><td colSpan={3} style={{ color: "var(--muted)" }}>No members found.</td></tr>
-              ) : (
-                users.map((u) => (
-                  <tr key={u.id}>
-                    <td>
-                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <span className="avatar">{initials(u.username)}</span>
-                        <span className="t-name">
-                          {u.username}
-                          {u.id === user?.id && (
-                            <span style={{ color: "var(--muted)", fontWeight: 400 }}> · you</span>
-                          )}
-                        </span>
-                      </div>
-                    </td>
-                    <td><span className={`role-pill ${u.role === "admin" ? "admin" : ""}`}>{u.role}</span></td>
-                    <td style={{ color: "var(--muted)" }}>#{String(u.id).padStart(3, "0")}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        {activeTab === "settings" && (
+          <AdminSettings />
+        )}
+      </AdminLayout>
 
       <AddCategoryModal isOpen={catModal} onClose={() => setCatModal(false)} onSuccess={refresh} />
       <AddProductModal isOpen={prodModal} onClose={() => setProdModal(false)} onSuccess={refresh} />
-    </div>
+    </>
   );
 }
 

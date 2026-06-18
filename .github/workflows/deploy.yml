@@ -1,0 +1,44 @@
+name: Deploy Frontend to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout kodi
+        uses: actions/checkout@v4
+
+      - name: Node.js o'rnatish
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Paketlarni o'rnatish
+        run: npm ci
+
+      - name: Build qilish
+        run: npm run build
+
+      - name: SSH kalitni tayyorlash
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key.pem
+          chmod 600 ~/.ssh/deploy_key.pem
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Serverga yuklash (SCP)
+        run: |
+          scp -i ~/.ssh/deploy_key.pem -r dist/* \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/shodmon-kiyim-kechak-pro/
+
+      - name: Nginx qayta ishga tushirish
+        run: |
+          ssh -i ~/.ssh/deploy_key.pem \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+            "sudo systemctl reload nginx"

@@ -40,7 +40,7 @@ function Login() {
       <aside className="auth-aside">
         <div className="auth-aside-art" />
         <div className="auth-aside-inner">
-          <span className="eyebrow">MAISON Atelier</span>
+          <span className="eyebrow">MONO Essentials</span>
           <h2>Dressing well is a quiet kind of confidence.</h2>
           <p>
             Sign in to explore a curated wardrobe of considered, timeless pieces —
@@ -98,7 +98,7 @@ function Login() {
           </div>
 
           <p className="auth-alt">
-            New to MAISON? <Link to="/signup">Create an account</Link>
+            New to MONO? <Link to="/signup">Create an account</Link>
           </p>
         </div>
       </main>

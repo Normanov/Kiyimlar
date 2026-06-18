@@ -10,6 +10,7 @@ import Signup from "./components/Signup.jsx";
 import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
 import { CartProvider } from "./context/CartContext.jsx";
 import { ToastProvider } from "./context/ToastContext.jsx";
+import { WishlistProvider } from "./context/WishlistContext.jsx";
 import "./App.css";
 
 function FullLoader() {
@@ -51,18 +52,27 @@ function NotFound() {
 }
 
 function Shell() {
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith("/admin");
+
+  if (isAdminPage) {
+    return (
+      <Routes>
+        <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+        <Route path="*" element={<Navigate to="/admin" replace />} />
+      </Routes>
+    );
+  }
+
   return (
     <>
       <Navbar />
       <main className="app-main">
         <Routes>
-          {/* Public storefront — anyone can browse without signing in */}
           <Route path="/" element={<CustomerPage />} />
           <Route path="/customer" element={<Navigate to="/" replace />} />
           <Route path="/login" element={<GuestOnly><Login /></GuestOnly>} />
           <Route path="/signup" element={<GuestOnly><Signup /></GuestOnly>} />
-          {/* Admin console — requires an admin login */}
-          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
@@ -78,7 +88,9 @@ function App() {
       <ToastProvider>
         <AuthProvider>
           <CartProvider>
-            <Shell />
+            <WishlistProvider>
+              <Shell />
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </ToastProvider>
