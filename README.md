@@ -1,53 +1,53 @@
-# MAISON — Storefront (React + Vite)
+﻿# FastAPI-E-Commarce
+It is a E-Commerce project , made purly by FastAPI backend. it is for the FastAPI tutorial series availbale on Youtube.https://www.youtube.com/playlist?list=PL0BwLgm6AcFZhJehdlez2NZtQ9Kn13OsP
 
-A professional storefront and admin console for the FastAPI e-commerce backend.
-Built with React 19, React Router and Axios.
-
-## Features
-
-- **Editorial design system** — custom palette, Fraunces + Inter typography, responsive layout.
-- **Auth** — branded split-screen Login & Sign-up with validation, password show/hide,
-  loading states, and one-tap demo credentials. JWT is restored on refresh.
-- **Storefront** — hero, category filter chips, live search, sorting, loading skeletons,
-  product cards with imagery, a product detail modal, and a slide-out shopping bag.
-- **Product imagery** — the backend has no image field, so each product gets an elegant,
-  deterministic SVG "lookbook" tile (per-category gradient + clothing silhouette). Always loads.
-- **Admin console** — stat cards, a recently-added product table with thumbnails, and
-  polished modals to create categories and products.
-- **Toasts** for instant feedback throughout.
-
-## Running it
-
-The backend must be running first (see the backend README — `docker compose up --build`).
+## Running locally (Docker)
 
 ```bash
-npm install
-npm run dev
+docker compose up --build
 ```
 
-Open http://localhost:5173
+This starts PostgreSQL, Redis, the FastAPI app, the Celery worker, runs the
+database migrations, and automatically seeds the default users, 12 categories
+and 100 products (each with an image) below.
 
-> The API base URL defaults to `http://localhost:8000`. Override it by creating a
-> `.env` file with `VITE_API_URL=http://your-host:8000`.
+- API: http://localhost:8000
+- Swagger docs: http://localhost:8000/docs
 
-## Demo accounts
+To re-run the migrations + seeding manually:
 
-| Role     | Username | Password     |
-|----------|----------|--------------|
-| Customer | `user`   | `user12345`  |
-| Admin    | `admin`  | `admin12345` |
-
-## Project structure
-
+```bash
+docker compose run --rm migrate
 ```
-src/
-├── api/            Axios client + endpoint wrappers (auto-attaches JWT)
-├── context/        Auth, Cart and Toast providers
-├── utils/catalog   Product imagery, pricing, rating helpers
-├── components/
-│   ├── Navbar, Footer, Icons, Login, Signup
-│   ├── customer/   CustomerPage, ProductCard, ProductGrid, ProductModal,
-│   │               CategoryList, CartDrawer, Stars
-│   └── admin/      AdminDashboard, AddProductModel, AddCategoryModel
-└── index.css       Design system (all component styling)
-```
+
+## Seed data
+
+On startup the `migrate` service runs `alembic upgrade head` and then `python seed.py`,
+which is idempotent (safe to run repeatedly). It seeds:
+
+- **Users** â€” from `seed_users.json` (see credentials below).
+- **Catalogue** â€” 12 categories and 100 products from `seed_products.json`. Each
+  product carries an `image_url` (Unsplash). The `product.image_url` column is added
+  by migration `b2f1c4d5e6a7`. Re-running the seed backfills the image on any product
+  that already exists, so an already-seeded database is updated in place.
+
+> If you seeded the catalogue before images were added, just run
+> `docker compose run --rm migrate` once to apply the new column and image URLs.
+
+## Default login credentials
+
+These accounts are created automatically from `seed_users.json` when the
+containers start. Log in via `POST /api/v1/users/token` (form fields:
+`username`, `password`).
+
+### Regular user (customer)
+- **Username:** `user`
+- **Password:** `user12345`
+
+### Admin
+- **Username:** `admin`
+- **Password:** `admin12345`
+
+> âš ï¸ These are default development credentials. Change them before deploying
+> anywhere public.
+
